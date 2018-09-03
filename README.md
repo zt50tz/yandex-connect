@@ -9,6 +9,7 @@ https://tech.yandex.ru/connect/directory/api/about-docpage/
 
 ```bash
 git clone https://github.com/zt50tz/yandex-connect
+cd yandex-connect
 sudo python setup.py install
 ```
 
