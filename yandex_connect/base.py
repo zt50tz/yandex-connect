@@ -13,6 +13,30 @@ import datetime
 import inspect
 
 
+def token_get_by_code(client_id, client_secret):
+    import requests
+    print 'Attempt to get oauth token for app'
+    client_id = input('Client id: ')
+    client_secret = input('Client secret: ')
+    print 'Open link in browser:'
+    print 'https://oauth.yandex.ru/authorize?response_type=code&client_id=%s' % client_id
+    code = input('Enter code: ')
+
+    auth = '%s:%s' % (client_id, client_secret)
+    headers = {
+        "Authorization": "Basic %s" % auth.encode('base64').replace('\n', '').strip()
+    }
+    r = requests.post(
+        'https://oauth.yandex.ru/token',
+        headers=headers,
+        data={
+            'grant_type': 'authorization_code',
+            'code': code
+        }
+    )
+    print r.text
+
+
 def json_prepare_dump(obj):
     """
     Подготовка к json.dumps
@@ -107,7 +131,7 @@ class YandexConnectRequest(object):
         kwargs = {
             'headers': {
                 'Authorization': 'OAuth %s' % self._oauth_token,
-                'X-Org-ID': self._org_id if self._org_id else None
+                'X-Org-ID': str(self._org_id) if self._org_id else None
             }
         }
         if method in ['post', 'patch']:
@@ -135,7 +159,7 @@ class YandexConnectRequest(object):
                 msg = r.json()
             except Exception:
                 msg = r.text
-            raise YandexConnectExceptionY(r.status_code, msg)
+            raise YandexConnectExceptionY(r.status_code, msg, url, kwargs)
         if method == 'delete':
             return True
         try:
@@ -186,7 +210,7 @@ class YandexConnectBase(object):
         :param kwargs: params
         :return: list
         """
-        kwargs['fields'] = self.prepare_fields(kwargs['fields'], default_field)
+        kwargs['fields'] = self.prepare_fields(kwargs.get('fields'), default_field)
         kwargs['per_page'] = 100
         pages = None
         page = 1
