@@ -121,7 +121,7 @@ class YandexConnectRequest(object):
             url = '%s/' % url
 
         if data:
-            for key in data.keys():
+            for key in list(data):
                 if data[key] is None or (isinstance(data[key], dict) and not data[key]):
                     del data[key]
                     continue
