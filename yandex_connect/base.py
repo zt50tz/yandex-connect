@@ -13,13 +13,13 @@ import datetime
 import inspect
 
 
-def token_get_by_code(client_id, client_secret):
+def token_get_by_code():
     import requests
-    print 'Attempt to get oauth token for app'
+    print ('Attempt to get oauth token for app')
     client_id = input('Client id: ')
     client_secret = input('Client secret: ')
-    print 'Open link in browser:'
-    print 'https://oauth.yandex.ru/authorize?response_type=code&client_id=%s' % client_id
+    print ('Open link in browser:')
+    print ('https://oauth.yandex.ru/authorize?response_type=code&client_id=%s' % client_id)
     code = input('Enter code: ')
 
     auth = '%s:%s' % (client_id, client_secret)
@@ -34,7 +34,7 @@ def token_get_by_code(client_id, client_secret):
             'code': code
         }
     )
-    print r.text
+    print (r.text)
 
 
 def json_prepare_dump(obj):

@@ -317,7 +317,7 @@ class YandexConnectDirectory(YandexConnectBase):
         :url man: https://tech.yandex.ru/connect/directory/api/concepts/groups/read-group-members-list-docpage/
         :return: yandex request list - участники команды
         """
-        return self.request('groups/%s/members', method='get')
+        return self.request('groups/%s/members' % group_id, method='get')
 
     def group_member_add(self, group_id, type, id):
         """
