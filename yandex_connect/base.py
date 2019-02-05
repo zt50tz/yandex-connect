@@ -87,8 +87,9 @@ class YandexConnectRequest(object):
     _oauth_token = None  # OAuth Token
     _org_id = None  # Org ID
     _domain = None  # Domain
+    _retry_max = 3  # Max retry if status_code = 502
 
-    def __init__(self, domain, oauth_token, org_id=None, version=6):
+    def __init__(self, domain, oauth_token, org_id=None, version=6, retry_max=3):
         """
         Init
         :param domain: yandex domain
@@ -99,10 +100,11 @@ class YandexConnectRequest(object):
         self._domain = domain
         self._oauth_token = oauth_token
         self._org_id = org_id
+        self._retry_max = retry_max
         if version:
             self._version = version
 
-    def __call__(self, name, data=None, method='post'):
+    def __call__(self, name, data=None, method='post', retry_count=0):
         """
         Base request method
         :param name: url path
@@ -162,6 +164,9 @@ class YandexConnectRequest(object):
                 msg = r.json()
             except Exception:
                 msg = r.text
+            if 500 <= r.status_code <= 599:
+                if retry_count <= self._retry_max:
+                    return self(name, data=data, method=method, retry_count=retry_count+1)
             raise YandexConnectExceptionY(r.status_code, msg, url, kwargs)
         if method == 'delete':
             return True
@@ -179,13 +184,13 @@ class YandexConnectBase(object):
 
     request = None  # Request object
 
-    def __init__(self, oauth_token, org_id=None, version=6):
+    def __init__(self, oauth_token, org_id=None, version=6, retry_max=3):
         """
         :param oauth_token: OAuth token
         :param org_id: ID org
         :param version: API version
         """
-        self.request = YandexConnectRequest(self.DOMAIN, oauth_token, org_id=org_id, version=version)
+        self.request = YandexConnectRequest(self.DOMAIN, oauth_token, org_id=org_id, version=version, retry_max=retry_max)
 
     @staticmethod
     def prepare_fields(fields, title_field, only_title_field=False):
