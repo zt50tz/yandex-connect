@@ -13,6 +13,17 @@ cd yandex-connect
 sudo python setup.py install
 ```
 
+
+### Получение токена
+
+Необходимо зарегистрировать приложение на странице https://oauth.yandex.ru/
+
+```python
+from yandex_connect import token_get_by_code
+token_get_by_code()
+```
+
+
 ### Пример
 
 ```python
