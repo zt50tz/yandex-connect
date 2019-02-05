@@ -2,11 +2,13 @@
 
 from setuptools import setup
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+from os import path
+this_directory = path.abspath(path.dirname(__file__))
+with open(path.join(this_directory, 'README.md')) as f:
+    long_description = f.read()
 
 setup(name='yandex_connect',
-      version='0.012b',
+      version='0.015b',
       description='API Yandex Connect',
       url='http://github.com/zt50tz/yandex-connect',
       author='Alexeev Nick',
@@ -14,6 +16,10 @@ setup(name='yandex_connect',
       license='MIT',
       packages=['yandex_connect'],
       install_requires=[
-          'requests',
+            'requests',
+            'docutils'
       ],
-      zip_safe=False)
+      zip_safe=False,
+      long_description=long_description,
+      long_description_content_type='text/markdown'
+)
