@@ -133,6 +133,9 @@ class YandexConnectDirectory(YandexConnectBase):
         :return: yandex request dict — созданный сотрудник
         """
         data = inspect_args_func(currentframe())
+        spos = data['nickname'].find('@')
+        if spos > -1:
+            data['nickname'] = data['nickname'][:spos]
         self.prepare_name(data)
         data['contacts'] = self.prepare_contacts(data['contacts'])
         return self.request('users', data, method='post')
@@ -263,10 +266,12 @@ class YandexConnectDirectory(YandexConnectBase):
     def group_list_full(self, fields=None):
         """
         Полный список команд
-        :param fields: поля, по умолчанию — id, name
+        :param fields: поля, по умолчанию — id, name, email
         :url man: https://tech.yandex.ru/connect/directory/api/concepts/groups/read-groups-list-docpage/
         :return: yandex request list - список команд
         """
+        if not fields:
+            fields = ['name', 'email']
         return self.list_full(self.group_list, 'name', **inspect_args_func(currentframe()))
 
     def group_info(self, group_id, fields=None):
@@ -338,7 +343,7 @@ class YandexConnectDirectory(YandexConnectBase):
         :url man: https://tech.yandex.ru/connect/directory/api/concepts/groups/bulk-add-group-member-docpage/
         :return: True
         """
-        return self.group_member_update(group_id, [{'operation_type': 'remove', 'value': {'id': user_id}}])
+        return self.group_member_update(group_id, [{'operation_type': 'remove', 'value': {'id': user_id, 'type': 'user'}}])
 
     def group_member_update(self, group_id, actions):
         """
