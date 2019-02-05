@@ -120,11 +120,14 @@ class YandexConnectRequest(object):
         if not url.endswith('/'):
             url = '%s/' % url
 
-        if data:
+        if data and isinstance(data, dict):
             for key in list(data):
                 if data[key] is None or (isinstance(data[key], dict) and not data[key]):
                     del data[key]
                     continue
+            if 'id' in data and type(data['id']) is not int:
+                data['id'] = int(data['id'])
+
         method = method.lower()
         if method not in ['get', 'post', 'patch', 'delete']:
             raise ValueError('Not right method')
