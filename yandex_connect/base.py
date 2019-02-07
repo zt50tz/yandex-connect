@@ -4,7 +4,7 @@
 Yandex.Connect Base API module
 :author: Alexeev Nick
 :email: n@akolka.ru
-:version: 0.01b
+:version: 0.2b
 """
 
 import json
@@ -194,6 +194,7 @@ class YandexConnectBase(object):
     DOMAIN = None  # Request Domain
 
     request = None  # Request object
+    cache = None  # Cache dict
 
     def __init__(self, oauth_token, org_id=None, version=6, retry_max=3):
         """
@@ -202,6 +203,7 @@ class YandexConnectBase(object):
         :param version: API version
         """
         self.request = YandexConnectRequest(self.DOMAIN, oauth_token, org_id=org_id, version=version, retry_max=retry_max)
+        self.cache = {}
 
     @staticmethod
     def prepare_fields(fields, title_field, only_title_field=False):
@@ -219,6 +221,8 @@ class YandexConnectBase(object):
                 fields = [title_field]
         if isinstance(fields, list):
             fields = u','.join(fields)
+        elif isinstance(fields, str):
+            fields = u','.join([el.strip() for el in fields.split(',') if el.strip()])
         return fields
 
     def list_full(self, callback, default_field, **kwargs):

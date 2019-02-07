@@ -4,7 +4,7 @@
 Yandex.Connect Directory API module
 :author: Alexeev Nick
 :email: n@akolka.ru
-:version: 0.01b
+:version: 0.2b
 """
 
 from .base import *
@@ -64,6 +64,38 @@ class YandexConnectDirectory(YandexConnectBase):
     # User
     # ------------------------------------------------------------------------------------------------------------------
 
+    def user_get_id_by_nickname(self, nickname):
+        """
+        Get user id by nickname
+        :param nickname: nickname / email
+        :return: int
+        """
+        if nickname.find('@'):
+            nickname = nickname[:nickname.find('@')]
+        if 'user_id_by_email' not in self.cache:
+            self.cache['user_id_by_email'] = {}
+        if nickname not in self.cache['user_id_by_email']:
+            user_items = self.user_list_full(nickname=nickname)
+            if user_items:
+                val = user_items[0]['id']
+            else:
+                raise YandexConnectException('No found user by nickname "%s"' % nickname)
+            self.cache['user_id_by_email'][nickname] = val
+        return self.cache['user_id_by_email'][nickname]
+
+    def user_id_check(self, user_id):
+        """
+        Prepare user_id to request
+        :param user_id: int / str
+        :return: int
+        """
+        if isinstance(user_id, str):
+            if not user_id.isdigit():
+                user_id = self.user_get_id_by_nickname(user_id)
+            else:
+                user_id = int(user_id)
+        return user_id
+
     def user_info(self, user_id, fields=None):
         """
         Получение информации о сотруднике
@@ -72,6 +104,7 @@ class YandexConnectDirectory(YandexConnectBase):
         :url man: https://tech.yandex.ru/connect/directory/api/concepts/users/read-user-docpage/
         :return: yandex request dict — информация о сотруднике
         """
+        user_id = self.user_id_check(user_id)
         data = inspect_args_func(currentframe())
         data['fields'] = self.prepare_fields(data['fields'], 'nickname')
         return self.request('users/%s' % user_id, data, method='get')
@@ -92,6 +125,7 @@ class YandexConnectDirectory(YandexConnectBase):
         :url man: https://tech.yandex.ru/connect/directory/api/concepts/users/read-users-list-docpage/
         :return: yandex request dict — список сотрудников
         """
+        group_id = self.group_id_check(group_id)
         data = inspect_args_func(currentframe())
         data['fields'] = self.prepare_fields(data['fields'], 'nickname')
         return self.request('users', data, method='get')
@@ -110,8 +144,9 @@ class YandexConnectDirectory(YandexConnectBase):
         :url man: https://tech.yandex.ru/connect/directory/api/concepts/users/read-users-list-docpage/
         :return: yandex request list - список сотрудников
         """
+        group_id = self.group_id_check(group_id)
         return self.list_full(self.user_list, 'nickname', **inspect_args_func(currentframe()))
-    
+
     def user_add(self, nickname, password, about=None, aliases=None, birthday=None, contacts=None, department_id=1, gender='male', is_admin=None, is_dismissed=None, name=None, secname=None, sername=None, position=None):
         """
         Добавление сотрудника
@@ -161,6 +196,7 @@ class YandexConnectDirectory(YandexConnectBase):
         :url man: https://tech.yandex.ru/connect/directory/api/concepts/users/edit-user-docpage/
         :return: yandex request dict — измененный сотрудник
         """
+        user_id = self.user_id_check(user_id)
         data = inspect_args_func(currentframe())
         self.prepare_name(data)
         data['contacts'] = self.prepare_contacts(data['contacts'])
@@ -174,6 +210,7 @@ class YandexConnectDirectory(YandexConnectBase):
         :url man: https://tech.yandex.ru/connect/directory/api/concepts/users/add-user-aliases-docpage/
         :return: yandex request dict
         """
+        user_id = self.user_id_check(user_id)
         return self.request('users/%s/aliases' % user_id, inspect_args_func(currentframe()), method='post')
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -250,6 +287,43 @@ class YandexConnectDirectory(YandexConnectBase):
     # Group
     # ------------------------------------------------------------------------------------------------------------------
 
+    def _group_cache_set(self):
+        """
+        Set cache for groups
+        :return: None
+        """
+        all_groups = self.group_list_full(fields='id,email,name')
+        self.cache['group_id_by_email'] = {}
+        self.cache['group_id_by_name'] = {}
+        for item in all_groups:
+            self.cache['group_id_by_email'][item['email']] = item['id']
+            self.cache['group_id_by_name'][item['name']] = item['id']
+
+    def group_get_id_by_email(self, email):
+        """
+        Get group ID by email
+        :param email: email
+        :return: int
+        """
+        if 'group_id_by_email' not in self.cache:
+            self._group_cache_set()
+        if email not in self.cache['group_id_by_email']:
+            raise YandexConnectException('No found group by email "%s"' % email)
+        return self.cache['group_id_by_email'][email]
+
+    def group_id_check(self, group_id):
+        """
+        Prepare group_id for request
+        :param group_id: int / str
+        :return: int
+        """
+        if isinstance(group_id, str):
+            if group_id.find('@') > -1:
+                group_id = self.group_get_id_by_email(group_id)
+            else:
+                group_id = int(group_id)
+        return group_id
+
     def group_list(self, fields=None, page=None, per_page=None):
         """
         Список команд
@@ -282,6 +356,7 @@ class YandexConnectDirectory(YandexConnectBase):
         :url man: https://tech.yandex.ru/connect/directory/api/concepts/groups/read-group-docpage/
         :return: yandex request dict - команда
         """
+        group_id = self.group_id_check(group_id)
         data = inspect_args_func(currentframe())
         data['fields'] = self.prepare_fields(data['fields'], 'name')
         return self.request('groups/%s' % group_id, data, method='get')
@@ -313,6 +388,7 @@ class YandexConnectDirectory(YandexConnectBase):
         :url man: https://tech.yandex.ru/connect/directory/api/concepts/groups/edit-group-docpage/
         :return: yandex request dict - измененная команда
         """
+        group_id = self.group_id_check(group_id)
         return self.request('groups/%s' % group_id, inspect_args_func(currentframe()), method='patch')
 
     def group_member_list(self, group_id):
@@ -322,18 +398,32 @@ class YandexConnectDirectory(YandexConnectBase):
         :url man: https://tech.yandex.ru/connect/directory/api/concepts/groups/read-group-members-list-docpage/
         :return: yandex request list - участники команды
         """
+        group_id = self.group_id_check(group_id)
         return self.request('groups/%s/members' % group_id, method='get')
 
-    def group_member_add(self, group_id, type, id):
+    def group_member_add(self, group_id, user_id, user_type='user'):
         """
         Добавить участника команды
-        :param group_id: ID
-        :param type: Тип - user|group|department
-        :param id: User ID
+        :param group_id: ID | email
+        :type group_id: int | str
+        :param user_id: User ID | list | email
+        :type user_id: int | list | str
+        :param user_type: Тип - user|group|department
         :url man: https://tech.yandex.ru/connect/directory/api/concepts/groups/add-group-member-docpage/
-        :return: yandex request dict
+        :return: yandex request dict | list
         """
-        return self.request('groups/%s/members' % group_id, inspect_args_func(currentframe()), method='post')
+        group_id = self.group_id_check(group_id)
+        if isinstance(user_id, list):
+            ret = []
+            for user_item_id in user_id:
+                ret.append(self.group_member_add(group_id, user_item_id, user_type=user_type))
+            return ret
+        user_id = self.user_get_id_by_nickname(user_id)
+        data = {
+            'id': user_id,
+            'type': user_type
+        }
+        return self.request('groups/%s/members' % group_id, data, method='post')
 
     def group_member_del(self, group_id, user_id):
         """
@@ -343,6 +433,8 @@ class YandexConnectDirectory(YandexConnectBase):
         :url man: https://tech.yandex.ru/connect/directory/api/concepts/groups/bulk-add-group-member-docpage/
         :return: True
         """
+        group_id = self.group_id_check(group_id)
+        user_id = self.user_id_check(user_id)
         return self.group_member_update(group_id, [{'operation_type': 'remove', 'value': {'id': user_id, 'type': 'user'}}])
 
     def group_member_update(self, group_id, actions):
@@ -353,6 +445,7 @@ class YandexConnectDirectory(YandexConnectBase):
         :url man: https://tech.yandex.ru/connect/directory/api/concepts/groups/bulk-add-group-member-docpage/
         :return: True
         """
+        group_id = self.group_id_check(group_id)
         return self.request('groups/%s/members/bulk-update' % group_id, data=actions, method='post')
 
     # ------------------------------------------------------------------------------------------------------------------

@@ -10,7 +10,13 @@ https://tech.yandex.ru/connect/directory/api/about-docpage/
 ```bash
 git clone https://github.com/zt50tz/yandex-connect
 cd yandex-connect
-sudo python setup.py install
+python setup.py install
+```
+
+Либо:
+
+```bash
+pip install yandex-connect
 ```
 
 
@@ -28,10 +34,55 @@ token_get_by_code()
 
 ```python
 from yandex_connect import YandexConnectDirectory
-app = YandexConnectDirectory('<OAuth TOKEN>', org_id=None)  # создание
-app.user_add('test', 'test234test')  # добавление сотрудника
-app.user_list_full()  # просмотр всех сотрудников
+api = YandexConnectDirectory('<OAuth TOKEN>', org_id=None)  # создание
+api.user_add('test', 'test234test')  # добавление сотрудника
+api.user_list_full()  # просмотр всех сотрудников
 ```
+
+Сервис использует идентификационные номера для всех объектов, а не
+значимые алиасы, что может быть усложняющим фактором при быстрой
+разработке, либо при исполнении функций из командной строки. То есть,
+для того, чтобы получить информацию о пользователе, необходимо выполнить
+следующий код:
+
+```python
+api.user_info(1000000000000000)
+
+>> {u'nickname': u'test', u'id': 1000000000000000}
+```
+
+Он не особо удобный для чтения и написания. В связи с этим добавлена
+возможность выполнить и такой код:
+
+```python
+api.user_info('test@test.ru')
+
+>> {u'nickname': u'test', u'id': 1000000000000000}
+```
+
+Так же, это справедливо для методов относительно групп. То есть, вместо:
+```python
+api.group_member_add(1, 1000000000000000)
+```
+
+Можно написать:
+```python
+api.group_member_add("test@test.ru", "test@test.ru")
+```
+
+Везде где используются параметры ```user_id``` и ```group_id``` можно
+использовать как ID, так и почту.
+
+### Отладка
+Что то может пойти не так. Чтобы увидеть какие данные уходят и
+возвращаются, можно использовать следующий код:
+
+```python
+import logging
+logger = logging.getLogger('YandexConnectRequest')
+logger.setLevel(logging.DEBUG)
+```
+
 
 Методы
 ------
@@ -59,7 +110,8 @@ app.user_list_full()  # просмотр всех сотрудников
 - ```group_add``` - Добавление команды
 - ```group_upd``` - Изменение команды
 - ```group_member_list``` - Участники команды
-- ```group_member_add``` - Добавить участника команды
+- ```group_member_add``` - Добавить участника команды. В качестве
+параметра ```user_id``` можно использовать массив ID/почт.
 - ```group_member_del``` - Удалить участника команды
 - ```group_member_update``` - Изменение участников команды
 

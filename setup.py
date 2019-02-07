@@ -8,7 +8,7 @@ with open(path.join(this_directory, 'README.md')) as f:
     long_description = f.read()
 
 setup(name='yandex_connect',
-      version='0.015b',
+      version='0.2b',
       description='API Yandex Connect',
       url='http://github.com/zt50tz/yandex-connect',
       author='Alexeev Nick',
