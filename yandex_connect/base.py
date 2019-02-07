@@ -11,6 +11,7 @@ import json
 import requests
 import datetime
 import inspect
+import logging
 
 
 def token_get_by_code():
@@ -88,6 +89,7 @@ class YandexConnectRequest(object):
     _org_id = None  # Org ID
     _domain = None  # Domain
     _retry_max = 3  # Max retry if status_code = 502
+    _logger = None  # Logger
 
     def __init__(self, domain, oauth_token, org_id=None, version=6, retry_max=3):
         """
@@ -103,6 +105,7 @@ class YandexConnectRequest(object):
         self._retry_max = retry_max
         if version:
             self._version = version
+        self._logger = logging.getLogger('YandexConnectRequest')
 
     def __call__(self, name, data=None, method='post', retry_count=0):
         """
@@ -155,10 +158,18 @@ class YandexConnectRequest(object):
         if not kwargs['headers']['X-Org-ID']:
             del kwargs['headers']['X-Org-ID']
 
+        self._logger.debug('YandexConnectRequest with "%s"' % method)
+        self._logger.debug('URL: %s' % url)
+        self._logger.debug(kwargs)
+
         try:
             r = getattr(requests, method)(url, **kwargs)
         except Exception:
             raise YandexConnectException(u'Request error: send', name, data)
+
+        self._logger.debug('Response code: %s' % r.status_code)
+        self._logger.debug('Response text: %s' % r.text)
+
         if r.status_code > 299:
             try:
                 msg = r.json()
