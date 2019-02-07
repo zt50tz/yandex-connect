@@ -67,7 +67,7 @@ api.group_member_add(1, 1000000000000000)
 
 Можно написать:
 ```python
-api.group_member_add("test@test.ru", "test@test.ru")
+api.group_member_add("group_users@test.ru", "test@test.ru")
 ```
 
 Везде где используются параметры ```user_id``` и ```group_id``` можно
