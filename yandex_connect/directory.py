@@ -418,7 +418,7 @@ class YandexConnectDirectory(YandexConnectBase):
             for user_item_id in user_id:
                 ret.append(self.group_member_add(group_id, user_item_id, user_type=user_type))
             return ret
-        user_id = self.user_get_id_by_nickname(user_id)
+        user_id = self.user_id_check(user_id)
         data = {
             'id': user_id,
             'type': user_type
