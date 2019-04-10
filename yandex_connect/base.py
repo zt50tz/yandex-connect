@@ -12,6 +12,7 @@ import requests
 import datetime
 import inspect
 import logging
+import base64
 
 
 def token_get_by_code():
@@ -25,7 +26,7 @@ def token_get_by_code():
 
     auth = '%s:%s' % (client_id, client_secret)
     headers = {
-        "Authorization": "Basic %s" % auth.encode('base64').replace('\n', '').strip()
+        "Authorization": "Basic %s" % base64.b64encode(auth).replace('\n', '').strip()
     }
     r = requests.post(
         'https://oauth.yandex.ru/token',
