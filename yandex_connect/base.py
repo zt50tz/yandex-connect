@@ -25,8 +25,9 @@ def token_get_by_code():
     code = input('Enter code: ')
 
     auth = '%s:%s' % (client_id, client_secret)
+    auth_base64 = base64.encodestring(auth.encode()).decode("utf-8")
     headers = {
-        "Authorization": "Basic %s" % base64.b64encode(auth).replace('\n', '').strip()
+        "Authorization": "Basic %s" % auth_base64.replace('\n', '').strip()
     }
     r = requests.post(
         'https://oauth.yandex.ru/token',
