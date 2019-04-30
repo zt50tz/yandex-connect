@@ -54,11 +54,13 @@ class YandexConnectDirectory(YandexConnectBase):
             'last': data['secname'],
             'middle': data['sername']
         }
-        for key in data['name'].keys():
+        for key in list(data['name'].keys()):
             if not data['name'][key]:
                 del data['name'][key]
         for key in ['secname', 'sername']:
             del data[key]
+        if not data['name']:
+            del data['name']
 
     # ------------------------------------------------------------------------------------------------------------------
     # User
@@ -175,11 +177,10 @@ class YandexConnectDirectory(YandexConnectBase):
         data['contacts'] = self.prepare_contacts(data['contacts'])
         return self.request('users', data, method='post')
 
-    def user_upd(self, user_id, nickname=None, password=None, about=None, birthday=None, contacts=None, department_id=None, gender=None, is_admin=None, is_dismissed=None, name=None, secname=None, sername=None, position=None):
+    def user_upd(self, user_id, password=None, about=None, birthday=None, contacts=None, department_id=None, gender=None, is_admin=None, is_dismissed=None, name=None, secname=None, sername=None, position=None):
         """
         Изменение сотрудника
         :param user_id: ID сотрудника
-        :param nickname: логин
         :param password: пароль
         :param about: описание
         :param aliases: list, ['псевдоним1', ...]
