@@ -177,7 +177,7 @@ class YandexConnectDirectory(YandexConnectBase):
         data['contacts'] = self.prepare_contacts(data['contacts'])
         return self.request('users', data, method='post')
 
-    def user_upd(self, user_id, password=None, about=None, birthday=None, contacts=None, department_id=None, gender=None, is_admin=None, is_dismissed=None, name=None, secname=None, sername=None, position=None):
+    def user_upd(self, user_id, password=None, about=None, birthday=None, contacts=None, department_id=None, gender=None, is_admin=None, is_dismissed=None, name=None, secname=None, sername=None, position=None, is_enabled=None):
         """
         Изменение сотрудника
         :param user_id: ID сотрудника
@@ -194,6 +194,7 @@ class YandexConnectDirectory(YandexConnectBase):
         :param secname: Фамилия
         :param sername: Отчество
         :param position: Должность
+        :param is_enabled: bool, Блокировка
         :url man: https://tech.yandex.ru/connect/directory/api/concepts/users/edit-user-docpage/
         :return: yandex request dict — измененный сотрудник
         """
