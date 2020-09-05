@@ -241,13 +241,14 @@ class YandexConnectDirectory(YandexConnectBase):
         """
         return self.list_full(self.department_list, 'name', **inspect_args_func(currentframe()))
 
-    def department_info(self, department_id):
+    def department_info(self, department_id, fields=None):
         """
         Получение информации об отделе
         :param department_id: ID
+        :param fields: поля, по умолчанию - id
         :return: yandex request dict
         """
-        return self.request('departments/%s' % department_id, method='get')
+        return self.request('departments/%s' % department_id, inspect_args_func(currentframe()), method='get')
 
     def department_add(self, name, label, description=None, head_id=None, parent_id=1):
         """
