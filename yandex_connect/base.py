@@ -17,15 +17,18 @@ import base64
 
 def token_get_by_code():
     import requests
-    print ('Attempt to get oauth token for app')
+    print('Attempt to get oauth token for app')
     client_id = input('Client id: ')
     client_secret = input('Client secret: ')
-    print ('Open link in browser:')
-    print ('https://oauth.yandex.ru/authorize?response_type=code&client_id=%s' % client_id)
+    print('Open link in browser:')
+    print('https://oauth.yandex.ru/authorize?response_type=code&client_id=%s' % client_id)
     code = input('Enter code: ')
 
     auth = '%s:%s' % (client_id, client_secret)
-    auth_base64 = base64.encodestring(auth.encode()).decode("utf-8")
+    if hasattr(base64, 'encodebytes'):
+        auth_base64 = base64.encodebytes(auth.encode('utf-8')).decode('utf-8')
+    else:
+        auth_base64 = base64.encodestring(auth.encode()).decode("utf-8")
     headers = {
         "Authorization": "Basic %s" % auth_base64.replace('\n', '').strip()
     }
@@ -37,7 +40,7 @@ def token_get_by_code():
             'code': code
         }
     )
-    print (r.text)
+    print(r.text)
 
 
 def json_prepare_dump(obj):
@@ -179,7 +182,7 @@ class YandexConnectRequest(object):
                 msg = r.text
             if 500 <= r.status_code <= 599:
                 if retry_count <= self._retry_max:
-                    return self(name, data=data, method=method, retry_count=retry_count+1)
+                    return self(name, data=data, method=method, retry_count=retry_count + 1)
             raise YandexConnectExceptionY(r.status_code, msg, url, kwargs)
         if method == 'delete':
             return True

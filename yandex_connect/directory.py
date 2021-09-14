@@ -72,7 +72,7 @@ class YandexConnectDirectory(YandexConnectBase):
         :param nickname: nickname / email
         :return: int
         """
-        if nickname.find('@'):
+        if nickname.find('@') > -1:
             nickname = nickname[:nickname.find('@')]
         if 'user_id_by_email' not in self.cache:
             self.cache['user_id_by_email'] = {}
